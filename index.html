@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Validação MonarcaHub - Coexistência</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #f0f2f5; }
+        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        button { background-color: #1877f2; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #166fe5; }
+        #status { margin-top: 20px; color: #666; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Conectar WhatsApp Clínica</h2>
+        <p>Clique abaixo para ativar o modo de coexistência.</p>
+        <button onclick="launchWhatsAppSignup()">Conectar com Meta</button>
+        <div id="status">Aguardando início...</div>
+    </div>
+
+    <script>
+        // Inicializa o SDK da Meta
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId: '1322580525486349', // Seu App ID fornecido
+                autoLogAppEvents: true,
+                xfbml: true,
+                version: 'v18.0'
+            });
+        };
+
+        function launchWhatsAppSignup() {
+            document.getElementById('status').innerText = "Abrindo popup...";
+
+            FB.login(function(response) {
+                if (response.authResponse) {
+                    const accessToken = response.authResponse.accessToken;
+                    console.log('Token do Cliente:', accessToken);
+                    document.getElementById('status').innerHTML = 
+                        '<b style="color: green;">Conectado com sucesso!</b><br>Token gerado no console (F12).';
+                    
+                    // Aqui você faria um fetch() para seu n8n enviando o accessToken
+                } else {
+                    document.getElementById('status').innerText = "O cliente cancelou ou houve um erro.";
+                }
+            }, {
+                // Permissões necessárias
+                scope: 'whatsapp_business_management,whatsapp_business_messaging,business_management',
+                extras: {
+                    "feature": "whatsapp_business_app_onboarding", // ATIVA COEXISTÊNCIA
+                    "setup_id": "878421224769472" // Seu Config ID fornecido
+                }
+            });
+        }
+    </script>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/pt_BR/sdk.js"></script>
+
+</body>
+</html>
