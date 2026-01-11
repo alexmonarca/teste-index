@@ -2,60 +2,302 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Validação MonarcaHub - Coexistência</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #f0f2f5; }
-        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
-        button { background-color: #1877f2; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #166fe5; }
-        #status { margin-top: 20px; color: #666; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        .card { 
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #25D366;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+            border-radius: 4px;
+        }
+        .info-box strong {
+            color: #25D366;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .info-box ul {
+            margin-left: 20px;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        button { 
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        #status { 
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .status-waiting {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .status-loading {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        .status-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        .status-error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .token-display {
+            margin-top: 15px;
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 6px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 12px;
+            text-align: left;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #25D366;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 4px;
+            text-align: left;
+            font-size: 13px;
+            color: #856404;
+        }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2>Conectar WhatsApp Clínica</h2>
-        <p>Clique abaixo para ativar o modo de coexistência.</p>
-        <button onclick="launchWhatsAppSignup()">Conectar com Meta</button>
-        <div id="status">Aguardando início...</div>
+        <h2>🔗 Conectar WhatsApp</h2>
+        <p class="subtitle">MonarcaHub - Modo Coexistência</p>
+
+        <div class="info-box">
+            <strong>✅ O que é Modo Coexistência?</strong>
+            <ul>
+                <li>Use o WhatsApp Business no celular normalmente</li>
+                <li>Receba mensagens via API simultaneamente</li>
+                <li>Ideal para equipes que preferem o app móvel</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            ⚠️ <strong>Importante:</strong> Certifique-se de que seu número não está com restrições ativas antes de conectar.
+        </div>
+
+        <button id="connectBtn" onclick="launchWhatsAppSignup()">
+            Conectar com Meta
+        </button>
+
+        <div id="status" class="status-waiting">
+            Aguardando início...
+        </div>
+
+        <div id="tokenDisplay" style="display: none;"></div>
     </div>
 
     <script>
+        const statusEl = document.getElementById('status');
+        const tokenDisplayEl = document.getElementById('tokenDisplay');
+        const connectBtn = document.getElementById('connectBtn');
+
+        // Configurações - AJUSTE AQUI
+        const CONFIG = {
+            appId: '1322580525486349',
+            setupId: '878421224769472',
+            // IMPORTANTE: Adicione sua URL de webhook aqui
+            webhookUrl: 'https://seu-dominio.com/webhook/whatsapp-coexistence'
+        };
+
         // Inicializa o SDK da Meta
         window.fbAsyncInit = function() {
             FB.init({
-                appId: '1322580525486349', // Seu App ID fornecido
+                appId: CONFIG.appId,
                 autoLogAppEvents: true,
                 xfbml: true,
-                version: 'v18.0'
+                version: 'v21.0' // Versão atualizada
             });
+            
+            console.log('✅ SDK da Meta inicializado');
         };
 
+        function updateStatus(message, type = 'waiting', showSpinner = false) {
+            statusEl.className = `status-${type}`;
+            statusEl.innerHTML = showSpinner 
+                ? `<div class="spinner"></div>${message}`
+                : message;
+        }
+
         function launchWhatsAppSignup() {
-            document.getElementById('status').innerText = "Abrindo popup...";
+            updateStatus('Abrindo popup da Meta...', 'loading', true);
+            connectBtn.disabled = true;
+
+            // Verifica se o SDK está carregado
+            if (typeof FB === 'undefined') {
+                updateStatus('❌ Erro: SDK da Meta não carregou. Recarregue a página.', 'error');
+                connectBtn.disabled = false;
+                return;
+            }
 
             FB.login(function(response) {
+                console.log('Resposta do FB.login:', response);
+
                 if (response.authResponse) {
                     const accessToken = response.authResponse.accessToken;
-                    console.log('Token do Cliente:', accessToken);
-                    document.getElementById('status').innerHTML = 
-                        '<b style="color: green;">Conectado com sucesso!</b><br>Token gerado no console (F12).';
+                    const code = response.authResponse.code; // Código de autorização
                     
-                    // Aqui você faria um fetch() para seu n8n enviando o accessToken
+                    console.log('✅ Autenticação bem-sucedida!');
+                    console.log('Access Token:', accessToken);
+                    if (code) console.log('Authorization Code:', code);
+
+                    updateStatus('✅ Conectado com sucesso!', 'success');
+
+                    // Exibe o token
+                    tokenDisplayEl.style.display = 'block';
+                    tokenDisplayEl.className = 'token-display';
+                    tokenDisplayEl.innerHTML = `
+                        <strong>Token de Acesso:</strong><br>
+                        ${accessToken}
+                        <br><br>
+                        <strong>Próximos passos:</strong><br>
+                        1. Copie este token<br>
+                        2. Envie para seu backend/n8n<br>
+                        3. Use para vincular o WABA
+                    `;
+
+                    // AQUI: Envie o token para seu backend
+                    sendToBackend(accessToken, code);
+
                 } else {
-                    document.getElementById('status').innerText = "O cliente cancelou ou houve um erro.";
+                    console.log('❌ Autenticação cancelada ou falhou');
+                    updateStatus('❌ Conexão cancelada ou erro ocorreu', 'error');
+                    connectBtn.disabled = false;
                 }
             }, {
-                // Permissões necessárias
+                config_id: CONFIG.setupId, // CORRETO: use config_id
+                response_type: 'code', // Solicita também o código
+                override_default_response_type: true,
                 scope: 'whatsapp_business_management,whatsapp_business_messaging,business_management',
-                extras: {
-                    "feature": "whatsapp_business_app_onboarding", // ATIVA COEXISTÊNCIA
-                    "setup_id": "878421224769472" // Seu Config ID fornecido
-                }
             });
         }
+
+        async function sendToBackend(accessToken, code) {
+            try {
+                // SUBSTITUA pela URL do seu webhook/backend
+                const response = await fetch(CONFIG.webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        access_token: accessToken,
+                        code: code,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                if (response.ok) {
+                    console.log('✅ Token enviado ao backend com sucesso');
+                    updateStatus('✅ Configuração concluída! Verifique seu sistema.', 'success');
+                } else {
+                    console.error('❌ Erro ao enviar token:', response.status);
+                    updateStatus('⚠️ Conectado, mas erro ao notificar sistema. Copie o token manualmente.', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Erro de rede:', error);
+                // Não mostra erro fatal, pois o token já foi gerado
+                updateStatus('⚠️ Conectado! Copie o token acima e configure manualmente.', 'success');
+            }
+        }
+
+        // Tratamento de erros
+        window.addEventListener('error', function(e) {
+            console.error('Erro global:', e.error);
+        });
     </script>
-    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/pt_BR/sdk.js"></script>
+
+    <!-- SDK do Facebook -->
+    <script async defer crossorigin="anonymous" 
+            src="https://connect.facebook.net/pt_BR/sdk.js">
+    </script>
 
 </body>
 </html>
